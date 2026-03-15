@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Calculadora Envíos · Abuela Tata</title>
+
+<style>
+
+body{
+font-family:Georgia,serif;
+background:#f5efe6;
+margin:0;
+padding:30px;
+color:#5b3f2d;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+margin-bottom:25px;
+}
+
+input,select{
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:14px;
+background:#7b5c47;
+color:white;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#5e4637;
+}
+
+.result{
+margin-top:25px;
+background:#faf7f3;
+padding:20px;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Calculadora de Envíos</h1>
+
+<input id="cp" placeholder="Código postal destino">
+
+<input id="largo" placeholder="Largo (cm)">
+
+<input id="ancho" placeholder="Ancho (cm)">
+
+<input id="alto" placeholder="Alto (cm)">
+
+<input id="peso" placeholder="Peso real (kg)">
+
+<button onclick="calcular()">Calcular envío</button>
+
+<div class="result" id="resultado"></div>
+
+</div>
+
+<script>
+
+function calcular(){
+
+let cp=document.getElementById("cp").value;
+let largo=parseFloat(document.getElementById("largo").value);
+let ancho=parseFloat(document.getElementById("ancho").value);
+let alto=parseFloat(document.getElementById("alto").value);
+let peso=parseFloat(document.getElementById("peso").value);
+
+let prefijo=cp.substring(0,2);
+
+let zona="NACIONAL";
+
+if(prefijo=="41"){
+zona="PROVINCIAL";
+}
+
+if(["04","11","14","18","21","23","29"].includes(prefijo)){
+zona="REGIONAL";
+}
+
+let pesoVol=(largo*ancho*alto)/6000;
+
+let pesoFact=Math.max(pesoVol,peso);
+
+let precio=0;
+
+if(zona=="PROVINCIAL"){
+
+if(pesoFact<=1)precio=3.15;
+else if(pesoFact<=3)precio=3.25;
+else if(pesoFact<=5)precio=3.45;
+else if(pesoFact<=10)precio=3.63;
+else if(pesoFact<=15)precio=4.00;
+else precio=4.00+(pesoFact-15)*0.24;
+
+}
+
+if(zona=="REGIONAL"){
+
+if(pesoFact<=1)precio=3.31;
+else if(pesoFact<=3)precio=3.40;
+else if(pesoFact<=5)precio=3.74;
+else if(pesoFact<=10)precio=4.00;
+else if(pesoFact<=15)precio=5.64;
+else precio=5.64+(pesoFact-15)*0.37;
+
+}
+
+if(zona=="NACIONAL"){
+
+if(pesoFact<=1)precio=3.59;
+else if(pesoFact<=3)precio=3.69;
+else if(pesoFact<=5)precio=4.20;
+else if(pesoFact<=10)precio=5.61;
+else if(pesoFact<=15)precio=6.70;
+else precio=6.70+(pesoFact-15)*0.75;
+
+}
+
+document.getElementById("resultado").innerHTML=
+`
+Destino CP: ${cp}<br><br>
+Zona: ${zona}<br><br>
+Peso volumétrico: ${pesoVol.toFixed(2)} kg<br>
+Peso real: ${peso.toFixed(2)} kg<br>
+Peso facturable: ${pesoFact.toFixed(2)} kg<br><br>
+
+<strong>Coste envío: ${precio.toFixed(2)} €</strong>
+`;
+
+}
+
+</script>
+
+</body>
+
+</html>
