@@ -1,169 +1,858 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Calculadora de Envíos · Abuela Tata</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#7b5c47" />
+  <link rel="manifest" href="manifest.json">
 
-<title>Calculadora Envíos · Abuela Tata</title>
+  <style>
+    :root{
+      --bg:#f5efe6;
+      --card:#fffaf4;
+      --ink:#5b3f2d;
+      --muted:#8b6f5b;
+      --line:#e7d9cc;
+      --accent:#7b5c47;
+      --ok:#2f7f75;
+      --danger:#b1453b;
+      --shadow:0 10px 30px rgba(91,63,45,.10);
+      --radius:18px;
+    }
 
-<style>
+    *{ box-sizing:border-box; }
 
-body{
-font-family:Georgia,serif;
-background:#f5efe6;
-margin:0;
-padding:30px;
-color:#5b3f2d;
-}
+    body{
+      margin:0;
+      font-family:Georgia, serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,.65), rgba(255,255,255,0)),
+        var(--bg);
+    }
 
-.container{
-max-width:500px;
-margin:auto;
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
+    .wrap{
+      max-width:980px;
+      margin:auto;
+      padding:22px 16px 40px;
+    }
 
-h1{
-text-align:center;
-margin-bottom:25px;
-}
+    .hero{
+      text-align:center;
+      margin-bottom:18px;
+    }
 
-input,select{
-width:100%;
-padding:12px;
-margin-bottom:15px;
-border-radius:8px;
-border:1px solid #ddd;
-font-size:16px;
-}
+    .hero h1{
+      margin:0 0 8px;
+      font-size:clamp(26px, 4vw, 40px);
+      letter-spacing:.5px;
+    }
 
-button{
-width:100%;
-padding:14px;
-background:#7b5c47;
-color:white;
-border:none;
-border-radius:10px;
-font-size:16px;
-cursor:pointer;
-}
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+    }
 
-button:hover{
-background:#5e4637;
-}
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+    }
 
-.result{
-margin-top:25px;
-background:#faf7f3;
-padding:20px;
-border-radius:10px;
-}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
 
-</style>
+    .card h2{
+      margin:0 0 14px;
+      font-size:20px;
+      font-weight:normal;
+    }
 
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:7px;
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .input,
+    .select{
+      width:100%;
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      font-size:16px;
+      outline:none;
+    }
+
+    .input:focus,
+    .select:focus{
+      border-color:#cdb8a6;
+      box-shadow:0 0 0 3px rgba(123,92,71,.08);
+    }
+
+    .row-3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+
+    .row-2{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .btns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:8px;
+    }
+
+    button{
+      appearance:none;
+      border:none;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:15px;
+      cursor:pointer;
+      transition:transform .05s ease, opacity .2s ease;
+    }
+
+    button:active{ transform:scale(.99); }
+
+    .btn-primary{
+      background:var(--accent);
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#efe3d7;
+      color:var(--ink);
+    }
+
+    .small{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#f3ebe3;
+      border:1px solid var(--line);
+      font-size:13px;
+      color:var(--ink);
+      margin:4px 6px 0 0;
+    }
+
+    .result-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .result-box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .result-box .k{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:6px;
+    }
+
+    .result-box .v{
+      font-size:18px;
+      line-height:1.25;
+    }
+
+    .total{
+      margin-top:12px;
+      padding:16px;
+      border-radius:16px;
+      background:#fff;
+      border:1px solid var(--line);
+    }
+
+    .total .label{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .total .price{
+      font-size:34px;
+      margin-top:6px;
+    }
+
+    .ok{ color:var(--ok); }
+    .danger{ color:var(--danger); }
+
+    .loader{
+      display:none;
+      margin-top:8px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .notice{
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      background:#fff;
+      border:1px dashed var(--line);
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    @media (max-width: 860px){
+      .grid{ grid-template-columns:1fr; }
+    }
+
+    @media (max-width: 560px){
+      .row-3{ grid-template-columns:1fr; }
+      .row-2{ grid-template-columns:1fr; }
+      .btns{ grid-template-columns:1fr; }
+      .result-grid{ grid-template-columns:1fr; }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Calculadora de Envíos</h1>
+      <p>Origen fijo: Marchena (Sevilla) · Tarifa GLS cargada</p>
+    </div>
 
-<div class="container">
+    <div class="grid">
+      <section class="card">
+        <h2>Datos del envío</h2>
 
-<h1>Calculadora de Envíos</h1>
+        <div class="field">
+          <label for="servicio">Tipo de servicio</label>
+          <select id="servicio" class="select">
+            <option value="BUSINESS_24_48">Business Parcel 24-48</option>
+            <option value="EXPRESS_19">Express 19</option>
+            <option value="GLS_14">GLS 14:00</option>
+            <option value="GLS_1030">GLS 10:30</option>
+            <option value="ECONOMY">Economy</option>
+            <option value="PORTUGAL">GLS Portugal</option>
+            <option value="EUROBUSINESS">Eurobusiness Parcel</option>
+            <option value="SMALL_EUROBUSINESS">Small Eurobusiness Parcel</option>
+            <option value="RETORNOS">Retornos</option>
+            <option value="ACUSE">Acuse</option>
+          </select>
+        </div>
 
-<input id="cp" placeholder="Código postal destino">
+        <div class="field">
+          <label for="cp">Código postal destino</label>
+          <input id="cp" class="input" type="text" inputmode="numeric" maxlength="5" placeholder="Ej. 10300">
+          <div id="cpLoader" class="loader">Buscando localidad de destino…</div>
+        </div>
 
-<input id="largo" placeholder="Largo (cm)">
+        <div class="row-3">
+          <div class="field">
+            <label for="largo">Largo (cm)</label>
+            <input id="largo" class="input" type="number" min="0" step="0.01" placeholder="60">
+          </div>
+          <div class="field">
+            <label for="ancho">Ancho (cm)</label>
+            <input id="ancho" class="input" type="number" min="0" step="0.01" placeholder="40">
+          </div>
+          <div class="field">
+            <label for="alto">Alto (cm)</label>
+            <input id="alto" class="input" type="number" min="0" step="0.01" placeholder="40">
+          </div>
+        </div>
 
-<input id="ancho" placeholder="Ancho (cm)">
+        <div class="field">
+          <label for="peso">Peso real (kg)</label>
+          <input id="peso" class="input" type="number" min="0" step="0.01" placeholder="11">
+        </div>
 
-<input id="alto" placeholder="Alto (cm)">
+        <div class="row-2">
+          <div class="field">
+            <label for="reembolso">Reembolso (€)</label>
+            <input id="reembolso" class="input" type="number" min="0" step="0.01" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="iva">IVA</label>
+            <select id="iva" class="select">
+              <option value="no">No incluir IVA</option>
+              <option value="si">Incluir IVA 21%</option>
+            </select>
+          </div>
+        </div>
 
-<input id="peso" placeholder="Peso real (kg)">
+        <div class="row-2">
+          <div class="field">
+            <label><input id="optRecogida" type="checkbox"> Recogida (+2,00 €)</label>
+          </div>
+          <div class="field">
+            <label><input id="optSabado" type="checkbox"> Entrega sábado (+9,00 €)</label>
+          </div>
+        </div>
 
-<button onclick="calcular()">Calcular envío</button>
+        <div class="row-2">
+          <div class="field">
+            <label><input id="optInterciudad" type="checkbox"> Interciudad (+2,00 €)</label>
+          </div>
+          <div class="field">
+            <label><input id="optAcuseExtra" type="checkbox"> Añadir acuse</label>
+          </div>
+        </div>
 
-<div class="result" id="resultado"></div>
+        <div class="btns">
+          <button class="btn-primary" id="btnCalcular">Calcular envío</button>
+          <button class="btn-secondary" id="btnLimpiar">Limpiar</button>
+        </div>
 
-</div>
+        <div class="notice">
+          La localidad de destino se busca por código postal. Si un CP comparte varias poblaciones, la app mostrará la primera devuelta por la consulta externa o varias si vienen agrupadas.
+        </div>
+      </section>
 
-<script>
+      <aside class="card">
+        <h2>Resultado</h2>
 
-function calcular(){
+        <div>
+          <span class="pill">Salida: <strong>Marchena (Sevilla)</strong></span>
+          <span class="pill">Origen CP: <strong>41620</strong></span>
+        </div>
 
-let cp=document.getElementById("cp").value;
-let largo=parseFloat(document.getElementById("largo").value);
-let ancho=parseFloat(document.getElementById("ancho").value);
-let alto=parseFloat(document.getElementById("alto").value);
-let peso=parseFloat(document.getElementById("peso").value);
+        <div class="result-grid">
+          <div class="result-box">
+            <div class="k">Destino</div>
+            <div class="v" id="rDestino">—</div>
+          </div>
 
-let prefijo=cp.substring(0,2);
+          <div class="result-box">
+            <div class="k">Zona</div>
+            <div class="v" id="rZona">—</div>
+          </div>
 
-let zona="NACIONAL";
+          <div class="result-box">
+            <div class="k">Servicio</div>
+            <div class="v" id="rServicio">—</div>
+          </div>
 
-if(prefijo=="41"){
-zona="PROVINCIAL";
-}
+          <div class="result-box">
+            <div class="k">País / Área</div>
+            <div class="v" id="rArea">—</div>
+          </div>
 
-if(["04","11","14","18","21","23","29"].includes(prefijo)){
-zona="REGIONAL";
-}
+          <div class="result-box">
+            <div class="k">Peso volumétrico</div>
+            <div class="v" id="rVol">—</div>
+          </div>
 
-let pesoVol=(largo*ancho*alto)/6000;
+          <div class="result-box">
+            <div class="k">Peso facturable</div>
+            <div class="v" id="rFact">—</div>
+          </div>
+        </div>
 
-let pesoFact=Math.max(pesoVol,peso);
+        <div class="total">
+          <div class="label">Coste final</div>
+          <div class="price" id="rPrecio">—</div>
+          <div class="small" id="rDetalle"></div>
+        </div>
 
-let precio=0;
+        <div class="notice" id="rAviso">
+          Introduce un código postal, medidas, peso y servicio.
+        </div>
+      </aside>
+    </div>
+  </div>
 
-if(zona=="PROVINCIAL"){
+  <script>
+    const ORIGEN = {
+      cp: "41620",
+      localidad: "Marchena",
+      provincia: "Sevilla"
+    };
 
-if(pesoFact<=1)precio=3.15;
-else if(pesoFact<=3)precio=3.25;
-else if(pesoFact<=5)precio=3.45;
-else if(pesoFact<=10)precio=3.63;
-else if(pesoFact<=15)precio=4.00;
-else precio=4.00+(pesoFact-15)*0.24;
+    const PREFIJOS = {
+      "01":"Álava","02":"Albacete","03":"Alicante","04":"Almería","05":"Ávila","06":"Badajoz",
+      "07":"Baleares","08":"Barcelona","09":"Burgos","10":"Cáceres","11":"Cádiz","12":"Castellón",
+      "13":"Ciudad Real","14":"Córdoba","15":"A Coruña","16":"Cuenca","17":"Girona","18":"Granada",
+      "19":"Guadalajara","20":"Guipúzcoa","21":"Huelva","22":"Huesca","23":"Jaén","24":"León",
+      "25":"Lleida","26":"La Rioja","27":"Lugo","28":"Madrid","29":"Málaga","30":"Murcia",
+      "31":"Navarra","32":"Ourense","33":"Asturias","34":"Palencia","35":"Las Palmas",
+      "36":"Pontevedra","37":"Salamanca","38":"Santa Cruz de Tenerife","39":"Cantabria",
+      "40":"Segovia","41":"Sevilla","42":"Soria","43":"Tarragona","44":"Teruel","45":"Toledo",
+      "46":"Valencia","47":"Valladolid","48":"Vizcaya","49":"Zamora","50":"Zaragoza",
+      "51":"Ceuta","52":"Melilla"
+    };
 
-}
+    const ANDALUCIA = ["04","11","14","18","21","23","29","41"];
 
-if(zona=="REGIONAL"){
+    const SERVICE_LABELS = {
+      BUSINESS_24_48: "Business Parcel 24-48",
+      EXPRESS_19: "Express 19",
+      GLS_14: "GLS 14:00",
+      GLS_1030: "GLS 10:30",
+      ECONOMY: "Economy",
+      PORTUGAL: "GLS Portugal",
+      EUROBUSINESS: "Eurobusiness Parcel",
+      SMALL_EUROBUSINESS: "Small Eurobusiness Parcel",
+      RETORNOS: "Retornos",
+      ACUSE: "Acuse"
+    };
 
-if(pesoFact<=1)precio=3.31;
-else if(pesoFact<=3)precio=3.40;
-else if(pesoFact<=5)precio=3.74;
-else if(pesoFact<=10)precio=4.00;
-else if(pesoFact<=15)precio=5.64;
-else precio=5.64+(pesoFact-15)*0.37;
+    const TARIFAS = {
+      GLS_1030: {
+        PROVINCIAL:{brackets:[1,3,5,10,15], prices:[5.14,5.14,5.51,6.63,8.69], plus:0.46},
+        REGIONAL:{brackets:[1,3,5,10,15], prices:[6.91,6.91,7.57,9.06,12.14], plus:0.66},
+        NACIONAL:{brackets:[1,3,5,10,15], prices:[7.37,7.49,8.45,9.98,13.21], plus:1.03}
+      },
+      GLS_14: {
+        PROVINCIAL:{brackets:[1,3,5,10,15], prices:[4.00,4.00,4.17,5.03,6.41], plus:0.30},
+        REGIONAL:{brackets:[1,3,5,10,15], prices:[4.60,4.60,5.64,6.41,8.59], plus:0.44},
+        NACIONAL:{brackets:[1,3,5,10,15], prices:[5.54,5.77,6.31,7.31,9.73], plus:0.79}
+      },
+      EXPRESS_19: {
+        PROVINCIAL:{brackets:[1,3,5,10,15], prices:[3.64,3.64,3.64,4.00,4.59], plus:0.23},
+        REGIONAL:{brackets:[1,3,5,10,15], prices:[4.00,4.00,4.00,4.83,6.60], plus:0.36},
+        NACIONAL:{brackets:[1,3,5,10,15], prices:[5.10,5.31,6.00,6.60,8.20], plus:0.72}
+      },
+      BUSINESS_24_48: {
+        PROVINCIAL:{brackets:[1,3,5,10,15], prices:[3.15,3.25,3.45,3.63,4.00], plus:0.24},
+        REGIONAL:{brackets:[1,3,5,10,15], prices:[3.31,3.40,3.74,4.00,5.64], plus:0.37},
+        NACIONAL:{brackets:[1,3,5,10,15], prices:[3.59,3.69,4.20,5.61,6.70], plus:0.75},
+        especiales:{
+          BALEARES_MAYORES:2.06,
+          BALEARES_MENORES:2.56,
+          CANARIAS_MAYORES:5.26,
+          CANARIAS_MENORES:5.49,
+          CEUTA:4.76,
+          MELILLA:4.76,
+          GIBRALTAR:3.21,
+          ANDORRA:{base:14.44, plus:1.00}
+        }
+      },
+      ECONOMY: {
+        BALEARES_MAYORES:{brackets:[1,3,5,10,15], prices:[6.56,10.16,14.29,22.31,31.54], plus:2.57},
+        BALEARES_MENORES:{brackets:[1,3,5,10,15], prices:[7.14,11.11,15.64,24.46,34.64], plus:3.14},
+        CANARIAS_MAYORES:{brackets:[1,3,5,10,15], prices:[11.93,20.33,28.14,49.84,72.79], plus:5.39},
+        CANARIAS_MENORES:{brackets:[1,3,5,10,15], prices:[13.09,22.31,30.90,54.79,80.01], plus:6.37},
+        CEUTA:{base:23.37, plus:4.27},
+        MELILLA:{base:23.37, plus:4.27},
+        GIBRALTAR:{base:19.11, plus:2.89},
+        ANDORRA:{base:14.73, plus:0.90},
+        TENERIFE_LAS_PALMAS:{brackets:[1,3,5,10,15], prices:[5.90,6.19,6.54,7.49,8.54], plus:0.47}
+      },
+      PORTUGAL: {
+        PORTUGAL:{brackets:[1,3,5,10,15], prices:[6.62,6.88,7.60,8.85,12.08], plus:0.89},
+        AZORES:{brackets:[1,3,5,10,15], prices:[29.46,40.14,50.81,77.51,104.20], plus:5.34},
+        MADEIRA:{brackets:[1,3,5,10,15], prices:[29.46,40.14,50.81,77.51,104.20], plus:5.34}
+      },
+      EUROBUSINESS: {
+        default:{brackets:[3,5,7,10,15,20,30,40], plus:1.54},
+        countries:{
+          ALEMANIA:[12.85,14.06,16.08,17.61,20.71,23.68,25.69,37.83],
+          AUSTRIA:[16.00,17.92,17.95,20.52,22.46,25.09,29.14,42.69],
+          BELGICA:[14.77,16.08,16.46,18.59,20.89,23.48,27.72,34.60],
+          BULGARIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          CHIPRE:[44.34,64.12,81.66,114.58,162.99,218.94,320.15,423.34],
+          CROACIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          DINAMARCA:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
+          ESLOVAQUIA:[22.52,24.77,25.68,28.45,30.39,33.20,37.25,54.03],
+          ESLOVENIA:[22.52,24.77,25.68,28.45,30.39,33.20,37.25,54.03],
+          ESTONIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          FINLANDIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          FRANCIA_ZONA_1:[13.89,15.15,16.46,18.49,21.49,25.09,28.52,40.68],
+          FRANCIA_ZONA_2:[35.02,37.32,38.62,41.71,44.71,49.37,52.81,64.95],
+          GRECIA_ZONA_1:[42.23,45.43,52.11,64.46,77.72,97.11,120.91,154.60],
+          HUNGRIA:[39.06,46.94,47.66,52.26,53.23,56.66,69.60,80.94],
+          IRLANDA_1:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          ITALIA_ZONA_1:[16.00,17.37,18.66,21.28,23.21,26.49,30.35,42.91],
+          LETONIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          LITUANIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          LUXEMBURGO:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
+          MALTA:[35.55,46.94,57.65,75.88,106.85,138.01,190.63,247.29],
+          NORUEGA:[38.19,41.94,43.78,48.78,52.66,59.09,71.22,87.42],
+          PAISES_BAJOS:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
+          POLONIA:[17.94,19.77,21.61,23.61,24.79,26.72,28.74,46.95],
+          REINO_UNIDO_ZONA_1:[15.66,17.37,18.66,20.52,22.46,25.09,29.14,42.69],
+          REINO_UNIDO_ZONA_2:[18.82,20.32,21.45,24.00,25.15,28.12,32.57,45.94],
+          REPUBLICA_CHECA:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
+          RUMANIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          SERBIA:[41.71,45.63,47.49,52.66,56.51,63.15,75.26,91.46],
+          SUECIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
+          SUIZA:[22.34,24.77,25.49,27.88,30.79,34.20,39.26,54.63],
+          TURQUIA:[44.34,64.12,81.66,114.58,162.99,218.94,320.15,423.34]
+        }
+      },
+      SMALL_EUROBUSINESS: {
+        countries:{
+          ALEMANIA:11.45, AUSTRIA:12.38, BELGICA:12.38, BULGARIA:24.39, CHIPRE:32.71,
+          CROACIA:24.39, DINAMARCA:12.38, ESLOVAQUIA:14.98, ESLOVENIA:14.98, ESTONIA:24.39,
+          FINLANDIA:24.39, FRANCIA_ZONA_1:11.45, FRANCIA_ZONA_2:33.63, GRECIA_ZONA_1:25.69,
+          HUNGRIA:24.39, IRLANDA_1:24.39, ITALIA_ZONA_1:12.74, LETONIA:24.39, LITUANIA:24.39,
+          LUXEMBURGO:12.38, MALTA:26.25, NORUEGA:33.63, PAISES_BAJOS:12.38, POLONIA:13.31,
+          REINO_UNIDO_ZONA_1:12.38, REINO_UNIDO_ZONA_2:13.15, REPUBLICA_CHECA:12.38,
+          RUMANIA:24.39, SERBIA:37.32, SUECIA:24.39, SUIZA:15.52, TURQUIA:32.72
+        }
+      },
+      RETORNOS: {
+        PROVINCIAL:{brackets:[1,3,5,10,15], prices:[1.22,1.99,2.29,2.49,2.91], plus:0.19},
+        REGIONAL:{brackets:[1,3,5,10,15], prices:[1.22,2.78,2.97,3.30,4.63], plus:0.32},
+        NACIONAL:{brackets:[1,3,5,10,15], prices:[1.22,3.20,3.62,4.33,5.58], plus:0.40},
+        especiales:{
+          BALEARES_MAYORES:{base:7.06, plus:3.06},
+          BALEARES_MENORES:{base:7.06, plus:3.06},
+          CANARIAS_MAYORES:{base:9.73, plus:5.14},
+          CANARIAS_MENORES:{base:9.73, plus:5.14}
+        }
+      },
+      ACUSE: {
+        PROVINCIAL:2.20,
+        REGIONAL:2.20,
+        NACIONAL:2.20,
+        BALEARES_MAYORES:3.06,
+        BALEARES_MENORES:3.84,
+        CANARIAS_MAYORES:6.74,
+        CANARIAS_MENORES:7.28,
+        CEUTA:6.22,
+        MELILLA:6.22,
+        GIBRALTAR:4.16,
+        ANDORRA:1.16
+      }
+    };
 
-}
+    function euro(n){
+      return new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR"}).format(n);
+    }
 
-if(zona=="NACIONAL"){
+    function round2(n){
+      return Math.round((n + Number.EPSILON) * 100) / 100;
+    }
 
-if(pesoFact<=1)precio=3.59;
-else if(pesoFact<=3)precio=3.69;
-else if(pesoFact<=5)precio=4.20;
-else if(pesoFact<=10)precio=5.61;
-else if(pesoFact<=15)precio=6.70;
-else precio=6.70+(pesoFact-15)*0.75;
+    function sanitizeCP(value){
+      return (value || "").replace(/\D/g,"").slice(0,5);
+    }
 
-}
+    function getProvinciaByCP(cp){
+      const prefix = sanitizeCP(cp).slice(0,2);
+      return PREFIJOS[prefix] || "";
+    }
 
-document.getElementById("resultado").innerHTML=
-`
-Destino CP: ${cp}<br><br>
-Zona: ${zona}<br><br>
-Peso volumétrico: ${pesoVol.toFixed(2)} kg<br>
-Peso real: ${peso.toFixed(2)} kg<br>
-Peso facturable: ${pesoFact.toFixed(2)} kg<br><br>
+    function getAreaByCP(cp){
+      const prefix = sanitizeCP(cp).slice(0,2);
+      if (prefix === "07") return "BALEARES";
+      if (prefix === "35") return "CANARIAS_MAYORES";
+      if (prefix === "38") return "CANARIAS_MENORES";
+      if (prefix === "51") return "CEUTA";
+      if (prefix === "52") return "MELILLA";
+      if (prefix === "41") return "PROVINCIAL";
+      if (ANDALUCIA.includes(prefix)) return "REGIONAL";
+      return "NACIONAL";
+    }
 
-<strong>Coste envío: ${precio.toFixed(2)} €</strong>
-`;
+    function calcTramos(weight, config){
+      const w = Math.max(0, Number(weight) || 0);
+      for(let i=0;i<config.brackets.length;i++){
+        if(w <= config.brackets[i]) return config.prices[i];
+      }
+      const lastBracket = config.brackets[config.brackets.length - 1];
+      const lastPrice = config.prices[config.prices.length - 1];
+      return lastPrice + ((w - lastBracket) * config.plus);
+    }
 
-}
+    function calcBaseAndPlus(weight, cfg){
+      const w = Math.max(0, Number(weight) || 0);
+      return cfg.base + (Math.max(0, w - 1) * cfg.plus);
+    }
 
-</script>
+    function getPesoVolumetrico(l,a,h){
+      return round2((l*a*h)/6000);
+    }
 
+    async function lookupDestinoES(cp){
+      const clean = sanitizeCP(cp);
+      if(clean.length !== 5) return null;
+
+      const loader = document.getElementById("cpLoader");
+      loader.style.display = "block";
+
+      try{
+        const res = await fetch(`https://api.zippopotam.us/ES/${clean}`);
+        if(!res.ok) throw new Error("CP no encontrado");
+        const data = await res.json();
+
+        const places = Array.isArray(data.places) ? data.places : [];
+        const nombres = [...new Set(places.map(p => p["place name"]).filter(Boolean))];
+        const provincias = [...new Set(places.map(p => p["state"]).filter(Boolean))];
+
+        return {
+          localidad: nombres.join(" / ") || "",
+          provincia: provincias.join(" / ") || getProvinciaByCP(clean),
+          raw: data
+        };
+      }catch(e){
+        return {
+          localidad: "",
+          provincia: getProvinciaByCP(clean),
+          raw: null,
+          error: true
+        };
+      }finally{
+        loader.style.display = "none";
+      }
+    }
+
+    function calcularExtras(areaKey){
+      let extras = 0;
+      let detalle = [];
+
+      const recogida = document.getElementById("optRecogida").checked;
+      const sabado = document.getElementById("optSabado").checked;
+      const interciudad = document.getElementById("optInterciudad").checked;
+      const acuse = document.getElementById("optAcuseExtra").checked;
+      const reembolso = Number(document.getElementById("reembolso").value || 0);
+
+      if(recogida){
+        extras += 2.00;
+        detalle.push("Recogida: " + euro(2.00));
+      }
+      if(sabado){
+        extras += 9.00;
+        detalle.push("Entrega sábado: " + euro(9.00));
+      }
+      if(interciudad){
+        extras += 2.00;
+        detalle.push("Interciudad: " + euro(2.00));
+      }
+      if(reembolso > 0){
+        const base = Math.max(reembolso * 0.03, 3.00);
+        extras += base;
+        detalle.push("Reembolso: " + euro(base));
+      }
+      if(acuse){
+        const acuseCfg = TARIFAS.ACUSE[areaKey];
+        if(typeof acuseCfg === "number"){
+          extras += acuseCfg;
+          detalle.push("Acuse: " + euro(acuseCfg));
+        }
+      }
+
+      return { extras: round2(extras), detalle };
+    }
+
+    function calcularBaseServicio(servicio, areaKey, pesoFact){
+      if(servicio === "BUSINESS_24_48"){
+        if(["PROVINCIAL","REGIONAL","NACIONAL"].includes(areaKey)){
+          return {
+            base: calcTramos(pesoFact, TARIFAS.BUSINESS_24_48[areaKey]),
+            nota: `Tarifa ${SERVICE_LABELS[servicio]} ${areaKey}`
+          };
+        }
+        const e = TARIFAS.BUSINESS_24_48.especiales[areaKey];
+        if(typeof e === "number"){
+          return { base: e, nota:`Tarifa especial ${areaKey}` };
+        }
+        if(e && typeof e === "object"){
+          return { base: calcBaseAndPlus(pesoFact, e), nota:`Tarifa especial ${areaKey}` };
+        }
+      }
+
+      if(["GLS_1030","GLS_14","EXPRESS_19","RETORNOS"].includes(servicio)){
+        if(["PROVINCIAL","REGIONAL","NACIONAL"].includes(areaKey)){
+          return {
+            base: calcTramos(pesoFact, TARIFAS[servicio][areaKey]),
+            nota: `Tarifa ${SERVICE_LABELS[servicio]} ${areaKey}`
+          };
+        }
+
+        if(servicio === "RETORNOS"){
+          const esp = TARIFAS.RETORNOS.especiales[areaKey];
+          if(esp){
+            return { base: calcBaseAndPlus(pesoFact, esp), nota:`Retorno especial ${areaKey}` };
+          }
+        }
+
+        throw new Error("Ese servicio no está tarifado en tu PDF para esta zona.");
+      }
+
+      if(servicio === "ECONOMY"){
+        const cfg = TARIFAS.ECONOMY[areaKey];
+        if(!cfg) throw new Error("Economy no está definido para esta zona en tu tarifa.");
+        if(cfg.brackets){
+          return { base: calcTramos(pesoFact, cfg), nota:`Economy ${areaKey}` };
+        }
+        return { base: calcBaseAndPlus(pesoFact, cfg), nota:`Economy ${areaKey}` };
+      }
+
+      if(servicio === "PORTUGAL"){
+        throw new Error("GLS Portugal requiere destino Portugal. Para España no aplica.");
+      }
+
+      if(servicio === "EUROBUSINESS"){
+        throw new Error("Eurobusiness Parcel es para destinos internacionales de Europa, no para CP español.");
+      }
+
+      if(servicio === "SMALL_EUROBUSINESS"){
+        throw new Error("Small Eurobusiness Parcel es para destinos internacionales de Europa, no para CP español.");
+      }
+
+      if(servicio === "ACUSE"){
+        const val = TARIFAS.ACUSE[areaKey];
+        if(typeof val !== "number"){
+          throw new Error("No hay acuse definido para esta zona.");
+        }
+        return { base: val, nota:`Acuse ${areaKey}` };
+      }
+
+      throw new Error("Servicio no soportado.");
+    }
+
+    async function calcular(){
+      const cp = sanitizeCP(document.getElementById("cp").value);
+      const servicio = document.getElementById("servicio").value;
+      const largo = Number(document.getElementById("largo").value || 0);
+      const ancho = Number(document.getElementById("ancho").value || 0);
+      const alto = Number(document.getElementById("alto").value || 0);
+      const pesoReal = Number(document.getElementById("peso").value || 0);
+      const conIVA = document.getElementById("iva").value === "si";
+
+      const rDestino = document.getElementById("rDestino");
+      const rZona = document.getElementById("rZona");
+      const rServicio = document.getElementById("rServicio");
+      const rArea = document.getElementById("rArea");
+      const rVol = document.getElementById("rVol");
+      const rFact = document.getElementById("rFact");
+      const rPrecio = document.getElementById("rPrecio");
+      const rDetalle = document.getElementById("rDetalle");
+      const rAviso = document.getElementById("rAviso");
+
+      try{
+        if(cp.length !== 5) throw new Error("Escribe un código postal válido de 5 cifras.");
+        if(!largo || !ancho || !alto || !pesoReal) throw new Error("Rellena medidas y peso.");
+
+        const areaKey = getAreaByCP(cp);
+        const provincia = getProvinciaByCP(cp);
+
+        const destinoData = await lookupDestinoES(cp);
+        const localidadTxt = destinoData?.localidad || "Localidad no encontrada";
+        const provinciaTxt = destinoData?.provincia || provincia || "Provincia no detectada";
+        const destinoTexto = `${localidadTxt} (${provinciaTxt})`;
+
+        const pesoVol = getPesoVolumetrico(largo, ancho, alto);
+        const pesoFact = round2(Math.max(pesoReal, pesoVol));
+
+        const baseCalc = calcularBaseServicio(servicio, areaKey, pesoFact);
+        const extrasCalc = calcularExtras(areaKey);
+
+        let subtotal = round2(baseCalc.base + extrasCalc.extras);
+        let total = subtotal;
+
+        if(conIVA){
+          total = round2(subtotal * 1.21);
+        }
+
+        rDestino.textContent = destinoTexto;
+        rZona.textContent = (
+          areaKey === "PROVINCIAL" ? "Provincial" :
+          areaKey === "REGIONAL" ? "Regional" :
+          areaKey === "NACIONAL" ? "Nacional" :
+          areaKey === "BALEARES" ? "Baleares" :
+          areaKey.replaceAll("_"," ")
+        );
+        rServicio.textContent = SERVICE_LABELS[servicio];
+        rArea.textContent = areaKey.replaceAll("_"," ");
+        rVol.textContent = `${pesoVol.toFixed(2)} kg`;
+        rFact.textContent = `${pesoFact.toFixed(2)} kg`;
+        rPrecio.textContent = euro(total);
+
+        const detalle = [
+          `Salida: ${ORIGEN.localidad} (${ORIGEN.provincia}) · CP ${ORIGEN.cp}`,
+          `Llegada: ${destinoTexto} · CP ${cp}`,
+          `Base: ${euro(baseCalc.base)}`,
+          ...extrasCalc.detalle
+        ];
+
+        if(conIVA){
+          detalle.push(`Subtotal sin IVA: ${euro(subtotal)}`);
+          detalle.push(`IVA 21% incluido`);
+        }else{
+          detalle.push(`Sin IVA`);
+        }
+
+        rDetalle.innerHTML = detalle.join("<br>");
+        rAviso.innerHTML = baseCalc.nota;
+        rAviso.className = "notice ok";
+
+      }catch(err){
+        rPrecio.textContent = "—";
+        rDetalle.textContent = "";
+        rDestino.textContent = "—";
+        rZona.textContent = "—";
+        rServicio.textContent = SERVICE_LABELS[servicio];
+        rArea.textContent = "—";
+        rVol.textContent = "—";
+        rFact.textContent = "—";
+        rAviso.textContent = err.message || "No se pudo calcular.";
+        rAviso.className = "notice danger";
+      }
+    }
+
+    function limpiar(){
+      document.getElementById("cp").value = "";
+      document.getElementById("largo").value = "";
+      document.getElementById("ancho").value = "";
+      document.getElementById("alto").value = "";
+      document.getElementById("peso").value = "";
+      document.getElementById("reembolso").value = "";
+      document.getElementById("iva").value = "no";
+      document.getElementById("servicio").value = "BUSINESS_24_48";
+      document.getElementById("optRecogida").checked = false;
+      document.getElementById("optSabado").checked = false;
+      document.getElementById("optInterciudad").checked = false;
+      document.getElementById("optAcuseExtra").checked = false;
+
+      document.getElementById("rDestino").textContent = "—";
+      document.getElementById("rZona").textContent = "—";
+      document.getElementById("rServicio").textContent = "—";
+      document.getElementById("rArea").textContent = "—";
+      document.getElementById("rVol").textContent = "—";
+      document.getElementById("rFact").textContent = "—";
+      document.getElementById("rPrecio").textContent = "—";
+      document.getElementById("rDetalle").textContent = "";
+      document.getElementById("rAviso").textContent = "Introduce un código postal, medidas, peso y servicio.";
+      document.getElementById("rAviso").className = "notice";
+    }
+
+    document.getElementById("btnCalcular").addEventListener("click", calcular);
+    document.getElementById("btnLimpiar").addEventListener("click", limpiar);
+
+    document.getElementById("cp").addEventListener("input", (e)=>{
+      e.target.value = sanitizeCP(e.target.value);
+    });
+  </script>
 </body>
-
 </html>
