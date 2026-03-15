@@ -6,7 +6,6 @@
   <title>Calculadora de Envíos · Abuela Tata</title>
 
   <meta name="theme-color" content="#7b5c47" />
-  <link rel="manifest" href="manifest.json">
 
   <style>
     :root{
@@ -177,6 +176,7 @@
       border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
+      min-height:82px;
     }
 
     .result-box .k{
@@ -188,6 +188,7 @@
     .result-box .v{
       font-size:18px;
       line-height:1.25;
+      word-break:break-word;
     }
 
     .total{
@@ -245,7 +246,7 @@
   <div class="wrap">
     <div class="hero">
       <h1>Calculadora de Envíos</h1>
-      <p>Origen fijo: Marchena (Sevilla) · Tarifa GLS cargada</p>
+      <p>Origen fijo: Marchena (Sevilla, 41620) · El destino se detecta por CP</p>
     </div>
 
     <div class="grid">
@@ -260,9 +261,6 @@
             <option value="GLS_14">GLS 14:00</option>
             <option value="GLS_1030">GLS 10:30</option>
             <option value="ECONOMY">Economy</option>
-            <option value="PORTUGAL">GLS Portugal</option>
-            <option value="EUROBUSINESS">Eurobusiness Parcel</option>
-            <option value="SMALL_EUROBUSINESS">Small Eurobusiness Parcel</option>
             <option value="RETORNOS">Retornos</option>
             <option value="ACUSE">Acuse</option>
           </select>
@@ -332,7 +330,7 @@
         </div>
 
         <div class="notice">
-          La localidad de destino se busca por código postal. Si un CP comparte varias poblaciones, la app mostrará la primera devuelta por la consulta externa o varias si vienen agrupadas.
+          Si la localidad exacta no se puede recuperar, la app seguirá funcionando y mostrará al menos la provincia.
         </div>
       </section>
 
@@ -361,7 +359,7 @@
           </div>
 
           <div class="result-box">
-            <div class="k">País / Área</div>
+            <div class="k">Área</div>
             <div class="v" id="rArea">—</div>
           </div>
 
@@ -417,9 +415,6 @@
       GLS_14: "GLS 14:00",
       GLS_1030: "GLS 10:30",
       ECONOMY: "Economy",
-      PORTUGAL: "GLS Portugal",
-      EUROBUSINESS: "Eurobusiness Parcel",
-      SMALL_EUROBUSINESS: "Small Eurobusiness Parcel",
       RETORNOS: "Retornos",
       ACUSE: "Acuse"
     };
@@ -445,87 +440,26 @@
         REGIONAL:{brackets:[1,3,5,10,15], prices:[3.31,3.40,3.74,4.00,5.64], plus:0.37},
         NACIONAL:{brackets:[1,3,5,10,15], prices:[3.59,3.69,4.20,5.61,6.70], plus:0.75},
         especiales:{
-          BALEARES_MAYORES:2.06,
-          BALEARES_MENORES:2.56,
+          BALEARES:2.06,
           CANARIAS_MAYORES:5.26,
           CANARIAS_MENORES:5.49,
           CEUTA:4.76,
-          MELILLA:4.76,
-          GIBRALTAR:3.21,
-          ANDORRA:{base:14.44, plus:1.00}
+          MELILLA:4.76
         }
       },
       ECONOMY: {
-        BALEARES_MAYORES:{brackets:[1,3,5,10,15], prices:[6.56,10.16,14.29,22.31,31.54], plus:2.57},
-        BALEARES_MENORES:{brackets:[1,3,5,10,15], prices:[7.14,11.11,15.64,24.46,34.64], plus:3.14},
+        BALEARES:{brackets:[1,3,5,10,15], prices:[6.56,10.16,14.29,22.31,31.54], plus:2.57},
         CANARIAS_MAYORES:{brackets:[1,3,5,10,15], prices:[11.93,20.33,28.14,49.84,72.79], plus:5.39},
         CANARIAS_MENORES:{brackets:[1,3,5,10,15], prices:[13.09,22.31,30.90,54.79,80.01], plus:6.37},
         CEUTA:{base:23.37, plus:4.27},
-        MELILLA:{base:23.37, plus:4.27},
-        GIBRALTAR:{base:19.11, plus:2.89},
-        ANDORRA:{base:14.73, plus:0.90},
-        TENERIFE_LAS_PALMAS:{brackets:[1,3,5,10,15], prices:[5.90,6.19,6.54,7.49,8.54], plus:0.47}
-      },
-      PORTUGAL: {
-        PORTUGAL:{brackets:[1,3,5,10,15], prices:[6.62,6.88,7.60,8.85,12.08], plus:0.89},
-        AZORES:{brackets:[1,3,5,10,15], prices:[29.46,40.14,50.81,77.51,104.20], plus:5.34},
-        MADEIRA:{brackets:[1,3,5,10,15], prices:[29.46,40.14,50.81,77.51,104.20], plus:5.34}
-      },
-      EUROBUSINESS: {
-        default:{brackets:[3,5,7,10,15,20,30,40], plus:1.54},
-        countries:{
-          ALEMANIA:[12.85,14.06,16.08,17.61,20.71,23.68,25.69,37.83],
-          AUSTRIA:[16.00,17.92,17.95,20.52,22.46,25.09,29.14,42.69],
-          BELGICA:[14.77,16.08,16.46,18.59,20.89,23.48,27.72,34.60],
-          BULGARIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          CHIPRE:[44.34,64.12,81.66,114.58,162.99,218.94,320.15,423.34],
-          CROACIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          DINAMARCA:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
-          ESLOVAQUIA:[22.52,24.77,25.68,28.45,30.39,33.20,37.25,54.03],
-          ESLOVENIA:[22.52,24.77,25.68,28.45,30.39,33.20,37.25,54.03],
-          ESTONIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          FINLANDIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          FRANCIA_ZONA_1:[13.89,15.15,16.46,18.49,21.49,25.09,28.52,40.68],
-          FRANCIA_ZONA_2:[35.02,37.32,38.62,41.71,44.71,49.37,52.81,64.95],
-          GRECIA_ZONA_1:[42.23,45.43,52.11,64.46,77.72,97.11,120.91,154.60],
-          HUNGRIA:[39.06,46.94,47.66,52.26,53.23,56.66,69.60,80.94],
-          IRLANDA_1:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          ITALIA_ZONA_1:[16.00,17.37,18.66,21.28,23.21,26.49,30.35,42.91],
-          LETONIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          LITUANIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          LUXEMBURGO:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
-          MALTA:[35.55,46.94,57.65,75.88,106.85,138.01,190.63,247.29],
-          NORUEGA:[38.19,41.94,43.78,48.78,52.66,59.09,71.22,87.42],
-          PAISES_BAJOS:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
-          POLONIA:[17.94,19.77,21.61,23.61,24.79,26.72,28.74,46.95],
-          REINO_UNIDO_ZONA_1:[15.66,17.37,18.66,20.52,22.46,25.09,29.14,42.69],
-          REINO_UNIDO_ZONA_2:[18.82,20.32,21.45,24.00,25.15,28.12,32.57,45.94],
-          REPUBLICA_CHECA:[16.00,17.92,18.66,20.52,22.46,25.09,29.14,42.69],
-          RUMANIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          SERBIA:[41.71,45.63,47.49,52.66,56.51,63.15,75.26,91.46],
-          SUECIA:[29.37,32.71,34.54,39.11,42.97,48.97,61.12,77.29],
-          SUIZA:[22.34,24.77,25.49,27.88,30.79,34.20,39.26,54.63],
-          TURQUIA:[44.34,64.12,81.66,114.58,162.99,218.94,320.15,423.34]
-        }
-      },
-      SMALL_EUROBUSINESS: {
-        countries:{
-          ALEMANIA:11.45, AUSTRIA:12.38, BELGICA:12.38, BULGARIA:24.39, CHIPRE:32.71,
-          CROACIA:24.39, DINAMARCA:12.38, ESLOVAQUIA:14.98, ESLOVENIA:14.98, ESTONIA:24.39,
-          FINLANDIA:24.39, FRANCIA_ZONA_1:11.45, FRANCIA_ZONA_2:33.63, GRECIA_ZONA_1:25.69,
-          HUNGRIA:24.39, IRLANDA_1:24.39, ITALIA_ZONA_1:12.74, LETONIA:24.39, LITUANIA:24.39,
-          LUXEMBURGO:12.38, MALTA:26.25, NORUEGA:33.63, PAISES_BAJOS:12.38, POLONIA:13.31,
-          REINO_UNIDO_ZONA_1:12.38, REINO_UNIDO_ZONA_2:13.15, REPUBLICA_CHECA:12.38,
-          RUMANIA:24.39, SERBIA:37.32, SUECIA:24.39, SUIZA:15.52, TURQUIA:32.72
-        }
+        MELILLA:{base:23.37, plus:4.27}
       },
       RETORNOS: {
         PROVINCIAL:{brackets:[1,3,5,10,15], prices:[1.22,1.99,2.29,2.49,2.91], plus:0.19},
         REGIONAL:{brackets:[1,3,5,10,15], prices:[1.22,2.78,2.97,3.30,4.63], plus:0.32},
         NACIONAL:{brackets:[1,3,5,10,15], prices:[1.22,3.20,3.62,4.33,5.58], plus:0.40},
         especiales:{
-          BALEARES_MAYORES:{base:7.06, plus:3.06},
-          BALEARES_MENORES:{base:7.06, plus:3.06},
+          BALEARES:{base:7.06, plus:3.06},
           CANARIAS_MAYORES:{base:9.73, plus:5.14},
           CANARIAS_MENORES:{base:9.73, plus:5.14}
         }
@@ -534,19 +468,19 @@
         PROVINCIAL:2.20,
         REGIONAL:2.20,
         NACIONAL:2.20,
-        BALEARES_MAYORES:3.06,
-        BALEARES_MENORES:3.84,
+        BALEARES:3.06,
         CANARIAS_MAYORES:6.74,
         CANARIAS_MENORES:7.28,
         CEUTA:6.22,
-        MELILLA:6.22,
-        GIBRALTAR:4.16,
-        ANDORRA:1.16
+        MELILLA:6.22
       }
     };
 
     function euro(n){
-      return new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR"}).format(n);
+      return new Intl.NumberFormat("es-ES", {
+        style:"currency",
+        currency:"EUR"
+      }).format(n);
     }
 
     function round2(n){
@@ -595,33 +529,49 @@
 
     async function lookupDestinoES(cp){
       const clean = sanitizeCP(cp);
-      if(clean.length !== 5) return null;
+      if (clean.length !== 5) return null;
 
       const loader = document.getElementById("cpLoader");
       loader.style.display = "block";
 
-      try{
-        const res = await fetch(`https://api.zippopotam.us/ES/${clean}`);
-        if(!res.ok) throw new Error("CP no encontrado");
-        const data = await res.json();
+      try {
+        const res = await fetch(`https://api.zippopotam.us/es/${clean}`, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json"
+          }
+        });
 
+        if (!res.ok) {
+          throw new Error("CP no encontrado");
+        }
+
+        const data = await res.json();
         const places = Array.isArray(data.places) ? data.places : [];
-        const nombres = [...new Set(places.map(p => p["place name"]).filter(Boolean))];
-        const provincias = [...new Set(places.map(p => p["state"]).filter(Boolean))];
+
+        const localidades = [...new Set(
+          places.map(p => p["place name"]).filter(Boolean)
+        )];
+
+        const provincias = [...new Set(
+          places.map(p => p["state"]).filter(Boolean)
+        )];
 
         return {
-          localidad: nombres.join(" / ") || "",
-          provincia: provincias.join(" / ") || getProvinciaByCP(clean),
-          raw: data
+          localidad: localidades.length ? localidades.join(" / ") : "",
+          provincia: provincias.length ? provincias.join(" / ") : getProvinciaByCP(clean),
+          raw: data,
+          error: false
         };
-      }catch(e){
+
+      } catch (e) {
         return {
           localidad: "",
           provincia: getProvinciaByCP(clean),
           raw: null,
           error: true
         };
-      }finally{
+      } finally {
         loader.style.display = "none";
       }
     }
@@ -640,19 +590,23 @@
         extras += 2.00;
         detalle.push("Recogida: " + euro(2.00));
       }
+
       if(sabado){
         extras += 9.00;
         detalle.push("Entrega sábado: " + euro(9.00));
       }
+
       if(interciudad){
         extras += 2.00;
         detalle.push("Interciudad: " + euro(2.00));
       }
+
       if(reembolso > 0){
         const base = Math.max(reembolso * 0.03, 3.00);
         extras += base;
         detalle.push("Reembolso: " + euro(base));
       }
+
       if(acuse){
         const acuseCfg = TARIFAS.ACUSE[areaKey];
         if(typeof acuseCfg === "number"){
@@ -676,9 +630,6 @@
         if(typeof e === "number"){
           return { base: e, nota:`Tarifa especial ${areaKey}` };
         }
-        if(e && typeof e === "object"){
-          return { base: calcBaseAndPlus(pesoFact, e), nota:`Tarifa especial ${areaKey}` };
-        }
       }
 
       if(["GLS_1030","GLS_14","EXPRESS_19","RETORNOS"].includes(servicio)){
@@ -696,28 +647,16 @@
           }
         }
 
-        throw new Error("Ese servicio no está tarifado en tu PDF para esta zona.");
+        throw new Error("Ese servicio no está definido para esta zona.");
       }
 
       if(servicio === "ECONOMY"){
         const cfg = TARIFAS.ECONOMY[areaKey];
-        if(!cfg) throw new Error("Economy no está definido para esta zona en tu tarifa.");
+        if(!cfg) throw new Error("Economy no está definido para esta zona.");
         if(cfg.brackets){
           return { base: calcTramos(pesoFact, cfg), nota:`Economy ${areaKey}` };
         }
         return { base: calcBaseAndPlus(pesoFact, cfg), nota:`Economy ${areaKey}` };
-      }
-
-      if(servicio === "PORTUGAL"){
-        throw new Error("GLS Portugal requiere destino Portugal. Para España no aplica.");
-      }
-
-      if(servicio === "EUROBUSINESS"){
-        throw new Error("Eurobusiness Parcel es para destinos internacionales de Europa, no para CP español.");
-      }
-
-      if(servicio === "SMALL_EUROBUSINESS"){
-        throw new Error("Small Eurobusiness Parcel es para destinos internacionales de Europa, no para CP español.");
       }
 
       if(servicio === "ACUSE"){
@@ -729,6 +668,27 @@
       }
 
       throw new Error("Servicio no soportado.");
+    }
+
+    async function pintarDestinoPreview(){
+      const cp = sanitizeCP(document.getElementById("cp").value);
+      const rDestino = document.getElementById("rDestino");
+
+      if (cp.length !== 5) {
+        rDestino.textContent = "—";
+        return;
+      }
+
+      const provincia = getProvinciaByCP(cp);
+      rDestino.textContent = `Buscando destino... (${provincia || "Provincia no detectada"})`;
+
+      const destinoData = await lookupDestinoES(cp);
+
+      if (destinoData?.localidad) {
+        rDestino.textContent = `${destinoData.localidad} (${destinoData.provincia})`;
+      } else {
+        rDestino.textContent = `Localidad no disponible (${provincia || "Provincia no detectada"})`;
+      }
     }
 
     async function calcular(){
@@ -755,11 +715,18 @@
         if(!largo || !ancho || !alto || !pesoReal) throw new Error("Rellena medidas y peso.");
 
         const areaKey = getAreaByCP(cp);
-        const provincia = getProvinciaByCP(cp);
+        const provinciaLocal = getProvinciaByCP(cp);
 
         const destinoData = await lookupDestinoES(cp);
-        const localidadTxt = destinoData?.localidad || "Localidad no encontrada";
-        const provinciaTxt = destinoData?.provincia || provincia || "Provincia no detectada";
+
+        let localidadTxt = "Localidad no disponible";
+        let provinciaTxt = provinciaLocal || "Provincia no detectada";
+
+        if (destinoData) {
+          if (destinoData.localidad) localidadTxt = destinoData.localidad;
+          if (destinoData.provincia) provinciaTxt = destinoData.provincia;
+        }
+
         const destinoTexto = `${localidadTxt} (${provinciaTxt})`;
 
         const pesoVol = getPesoVolumetrico(largo, ancho, alto);
@@ -776,13 +743,12 @@
         }
 
         rDestino.textContent = destinoTexto;
-        rZona.textContent = (
+        rZona.textContent =
           areaKey === "PROVINCIAL" ? "Provincial" :
           areaKey === "REGIONAL" ? "Regional" :
           areaKey === "NACIONAL" ? "Nacional" :
           areaKey === "BALEARES" ? "Baleares" :
-          areaKey.replaceAll("_"," ")
-        );
+          areaKey.replaceAll("_"," ");
         rServicio.textContent = SERVICE_LABELS[servicio];
         rArea.textContent = areaKey.replaceAll("_"," ");
         rVol.textContent = `${pesoVol.toFixed(2)} kg`;
@@ -798,19 +764,18 @@
 
         if(conIVA){
           detalle.push(`Subtotal sin IVA: ${euro(subtotal)}`);
-          detalle.push(`IVA 21% incluido`);
-        }else{
-          detalle.push(`Sin IVA`);
+          detalle.push("IVA 21% incluido");
+        } else {
+          detalle.push("Sin IVA");
         }
 
         rDetalle.innerHTML = detalle.join("<br>");
-        rAviso.innerHTML = baseCalc.nota;
+        rAviso.textContent = baseCalc.nota;
         rAviso.className = "notice ok";
 
-      }catch(err){
+      } catch(err){
         rPrecio.textContent = "—";
         rDetalle.textContent = "";
-        rDestino.textContent = "—";
         rZona.textContent = "—";
         rServicio.textContent = SERVICE_LABELS[servicio];
         rArea.textContent = "—";
@@ -852,6 +817,10 @@
 
     document.getElementById("cp").addEventListener("input", (e)=>{
       e.target.value = sanitizeCP(e.target.value);
+    });
+
+    document.getElementById("cp").addEventListener("blur", async ()=>{
+      await pintarDestinoPreview();
     });
   </script>
 </body>
