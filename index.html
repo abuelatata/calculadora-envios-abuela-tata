@@ -1,0 +1,440 @@
+<script>
+  const ORIGEN = {
+    cp: "41620",
+    localidad: "Marchena",
+    provincia: "Sevilla"
+  };
+
+  const PREFIJOS = {
+    "01":"Álava","02":"Albacete","03":"Alicante","04":"Almería","05":"Ávila","06":"Badajoz",
+    "07":"Baleares","08":"Barcelona","09":"Burgos","10":"Cáceres","11":"Cádiz","12":"Castellón",
+    "13":"Ciudad Real","14":"Córdoba","15":"A Coruña","16":"Cuenca","17":"Girona","18":"Granada",
+    "19":"Guadalajara","20":"Guipúzcoa","21":"Huelva","22":"Huesca","23":"Jaén","24":"León",
+    "25":"Lleida","26":"La Rioja","27":"Lugo","28":"Madrid","29":"Málaga","30":"Murcia",
+    "31":"Navarra","32":"Ourense","33":"Asturias","34":"Palencia","35":"Las Palmas",
+    "36":"Pontevedra","37":"Salamanca","38":"Santa Cruz de Tenerife","39":"Cantabria",
+    "40":"Segovia","41":"Sevilla","42":"Soria","43":"Tarragona","44":"Teruel","45":"Toledo",
+    "46":"Valencia","47":"Valladolid","48":"Vizcaya","49":"Zamora","50":"Zaragoza",
+    "51":"Ceuta","52":"Melilla"
+  };
+
+  const ANDALUCIA = ["04","11","14","18","21","23","29","41"];
+
+  const SERVICE_LABELS = {
+    BUSINESS_24_48: "Business Parcel 24-48",
+    EXPRESS_19: "Express 19",
+    GLS_14: "GLS 14:00",
+    GLS_1030: "GLS 10:30",
+    ECONOMY: "Economy",
+    RETORNOS: "Retornos",
+    ACUSE: "Acuse"
+  };
+
+  const TARIFAS = {
+    GLS_1030: {
+      PROVINCIAL:{brackets:[1,3,5,10,15], prices:[5.56,5.56,5.96,7.18,9.41], plus:0.51},
+      REGIONAL:{brackets:[1,3,5,10,15], prices:[7.48,7.48,8.19,9.79,13.12], plus:0.73},
+      NACIONAL:{brackets:[1,3,5,10,15], prices:[7.97,8.11,9.14,10.81,14.29], plus:1.06}
+    },
+
+    GLS_14: {
+      PROVINCIAL:{brackets:[1,3,5,10,15], prices:[4.33,4.33,4.50,5.44,6.95], plus:0.32},
+      REGIONAL:{brackets:[1,3,5,10,15], prices:[4.97,4.97,6.11,6.93,9.28], plus:0.47},
+      NACIONAL:{brackets:[1,3,5,10,15], prices:[5.99,6.24,6.83,7.90,10.52], plus:0.84}
+    },
+
+    EXPRESS_19: {
+      PROVINCIAL:{brackets:[1,3,5,10,11,12,13,14,15], prices:[3.87,3.87,3.87,4.25,4.33,4.41,4.56,4.81,4.87], plus:0.25},
+      REGIONAL:{brackets:[1,3,5,10,11,12,13,14,15], prices:[4.25,4.25,4.25,5.14,5.30,5.89,6.33,6.77,7.05], plus:0.38},
+      NACIONAL:{brackets:[1,3,5,10,11,12,13,14,15], prices:[5.59,5.81,6.36,7.33,7.65,8.24,8.83,9.80,9.80], plus:0.79}
+    },
+
+    BUSINESS_24_48: {
+      PROVINCIAL:{brackets:[1,3,5,10,15,20,25], prices:[3.33,3.43,3.55,3.74,4.10,4.80,5.49], plus:0.26},
+      REGIONAL:{brackets:[1,3,5,10,15,20,25], prices:[3.57,3.67,3.85,4.12,5.80,6.67,7.45], plus:0.31},
+      NACIONAL:{brackets:[1,3,5,10,15,20,25], prices:[3.92,4.03,4.29,5.77,6.90,8.19,8.75], plus:0.65}
+    },
+
+    ECONOMY: {
+      BALEARES:{brackets:[1,3,5,10,15], prices:[8.08,12.39,17.43,27.22,38.47], plus:3.14},
+      CANARIAS_MAYORES:{brackets:[1,3,5,10,15], prices:[14.55,24.80,34.34,60.82,88.80], plus:6.58},
+      CANARIAS_MENORES:{brackets:[1,3,5,10,15], prices:[15.96,27.22,37.71,66.84,97.63], plus:7.78},
+      CEUTA:{base:28.52, plus:4.74},
+      MELILLA:{base:28.52, plus:5.23}
+    },
+
+    RETORNOS: {
+      PROVINCIAL:{brackets:[1,3,5,10,15], prices:[1.26,2.05,2.36,2.56,3.00], plus:0.20},
+      REGIONAL:{brackets:[1,3,5,10,15], prices:[1.26,2.86,3.06,3.40,4.77], plus:0.33},
+      NACIONAL:{brackets:[1,3,5,10,15], prices:[1.26,3.30,3.73,4.46,5.75], plus:0.41},
+      especiales:{
+        BALEARES:{base:7.27, plus:3.15},
+        CANARIAS_MAYORES:{base:10.02, plus:5.29},
+        CANARIAS_MENORES:{base:10.02, plus:5.29}
+      }
+    },
+
+    ACUSE: {
+      PROVINCIAL:3.19,
+      REGIONAL:3.19,
+      NACIONAL:3.19,
+      BALEARES:3.15,
+      CANARIAS_MAYORES:6.94,
+      CANARIAS_MENORES:7.50,
+      CEUTA:6.41,
+      MELILLA:6.41
+    }
+  };
+
+  function euro(n){
+    return new Intl.NumberFormat("es-ES", {
+      style:"currency",
+      currency:"EUR"
+    }).format(n);
+  }
+
+  function round2(n){
+    return Math.round((n + Number.EPSILON) * 100) / 100;
+  }
+
+  function sanitizeCP(value){
+    return (value || "").replace(/\D/g,"").slice(0,5);
+  }
+
+  function getProvinciaByCP(cp){
+    const prefix = sanitizeCP(cp).slice(0,2);
+    return PREFIJOS[prefix] || "";
+  }
+
+  function getAreaByCP(cp){
+    const prefix = sanitizeCP(cp).slice(0,2);
+    if (prefix === "07") return "BALEARES";
+    if (prefix === "35") return "CANARIAS_MAYORES";
+    if (prefix === "38") return "CANARIAS_MENORES";
+    if (prefix === "51") return "CEUTA";
+    if (prefix === "52") return "MELILLA";
+    if (prefix === "41") return "PROVINCIAL";
+    if (ANDALUCIA.includes(prefix)) return "REGIONAL";
+    return "NACIONAL";
+  }
+
+  function calcTramos(weight, config){
+    const w = Math.max(0, Number(weight) || 0);
+    for(let i=0;i<config.brackets.length;i++){
+      if(w <= config.brackets[i]) return config.prices[i];
+    }
+    const lastBracket = config.brackets[config.brackets.length - 1];
+    const lastPrice = config.prices[config.prices.length - 1];
+    return lastPrice + ((w - lastBracket) * config.plus);
+  }
+
+  function calcBaseAndPlus(weight, cfg){
+    const w = Math.max(0, Number(weight) || 0);
+    return cfg.base + (Math.max(0, w - 1) * cfg.plus);
+  }
+
+  function getPesoVolumetrico(l,a,h){
+    return round2((l*a*h)/6000);
+  }
+
+  async function lookupDestinoES(cp){
+    const clean = sanitizeCP(cp);
+    if (clean.length !== 5) return null;
+
+    const loader = document.getElementById("cpLoader");
+    loader.style.display = "block";
+
+    try {
+      const res = await fetch(`https://api.zippopotam.us/es/${clean}`, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error("CP no encontrado");
+      }
+
+      const data = await res.json();
+      const places = Array.isArray(data.places) ? data.places : [];
+
+      const localidades = [...new Set(
+        places.map(p => p["place name"]).filter(Boolean)
+      )];
+
+      const provincias = [...new Set(
+        places.map(p => p["state"]).filter(Boolean)
+      )];
+
+      return {
+        localidad: localidades.length ? localidades.join(" / ") : "",
+        provincia: provincias.length ? provincias.join(" / ") : getProvinciaByCP(clean),
+        raw: data,
+        error: false
+      };
+
+    } catch (e) {
+      return {
+        localidad: "",
+        provincia: getProvinciaByCP(clean),
+        raw: null,
+        error: true
+      };
+    } finally {
+      loader.style.display = "none";
+    }
+  }
+
+  function calcularExtras(areaKey){
+    let extras = 0;
+    let detalle = [];
+
+    const recogida = document.getElementById("optRecogida").checked;
+    const sabado = document.getElementById("optSabado").checked;
+    const interciudad = document.getElementById("optInterciudad").checked;
+    const acuse = document.getElementById("optAcuseExtra").checked;
+    const reembolso = Number(document.getElementById("reembolso").value || 0);
+
+    if(recogida){
+      extras += 2.00;
+      detalle.push("Recogida: " + euro(2.00));
+    }
+
+    if(sabado){
+      extras += 9.00;
+      detalle.push("Entrega sábado: " + euro(9.00));
+    }
+
+    if(interciudad){
+      extras += 2.00;
+      detalle.push("Interciudad: " + euro(2.00));
+    }
+
+    if(reembolso > 0){
+      const base = Math.max(reembolso * 0.03, 3.00);
+      extras += base;
+      detalle.push("Reembolso: " + euro(base));
+    }
+
+    if(acuse){
+      const acuseCfg = TARIFAS.ACUSE[areaKey];
+      if(typeof acuseCfg === "number"){
+        extras += acuseCfg;
+        detalle.push("Acuse: " + euro(acuseCfg));
+      }
+    }
+
+    return { extras: round2(extras), detalle };
+  }
+
+  function calcularBaseServicio(servicio, areaKey, pesoFact){
+    if(servicio === "BUSINESS_24_48"){
+      if(["PROVINCIAL","REGIONAL","NACIONAL"].includes(areaKey)){
+        return {
+          base: calcTramos(pesoFact, TARIFAS.BUSINESS_24_48[areaKey]),
+          nota: `Tarifa ${SERVICE_LABELS[servicio]} ${areaKey}`
+        };
+      }
+      throw new Error("Ese servicio no está definido para esta zona.");
+    }
+
+    if(["GLS_1030","GLS_14","EXPRESS_19"].includes(servicio)){
+      if(["PROVINCIAL","REGIONAL","NACIONAL"].includes(areaKey)){
+        return {
+          base: calcTramos(pesoFact, TARIFAS[servicio][areaKey]),
+          nota: `Tarifa ${SERVICE_LABELS[servicio]} ${areaKey}`
+        };
+      }
+      throw new Error("Ese servicio no está definido para esta zona.");
+    }
+
+    if(servicio === "RETORNOS"){
+      if(["PROVINCIAL","REGIONAL","NACIONAL"].includes(areaKey)){
+        return {
+          base: calcTramos(pesoFact, TARIFAS.RETORNOS[areaKey]),
+          nota: `Tarifa ${SERVICE_LABELS[servicio]} ${areaKey}`
+        };
+      }
+
+      const esp = TARIFAS.RETORNOS.especiales[areaKey];
+      if(esp){
+        return { base: calcBaseAndPlus(pesoFact, esp), nota:`Retorno especial ${areaKey}` };
+      }
+
+      throw new Error("Ese servicio no está definido para esta zona.");
+    }
+
+    if(servicio === "ECONOMY"){
+      const cfg = TARIFAS.ECONOMY[areaKey];
+      if(!cfg) throw new Error("Economy no está definido para esta zona.");
+      if(cfg.brackets){
+        return { base: calcTramos(pesoFact, cfg), nota:`Economy ${areaKey}` };
+      }
+      return { base: calcBaseAndPlus(pesoFact, cfg), nota:`Economy ${areaKey}` };
+    }
+
+    if(servicio === "ACUSE"){
+      const val = TARIFAS.ACUSE[areaKey];
+      if(typeof val !== "number"){
+        throw new Error("No hay acuse definido para esta zona.");
+      }
+      return { base: val, nota:`Acuse ${areaKey}` };
+    }
+
+    throw new Error("Servicio no soportado.");
+  }
+
+  async function pintarDestinoPreview(){
+    const cp = sanitizeCP(document.getElementById("cp").value);
+    const rDestino = document.getElementById("rDestino");
+
+    if (cp.length !== 5) {
+      rDestino.textContent = "—";
+      return;
+    }
+
+    const provincia = getProvinciaByCP(cp);
+    rDestino.textContent = `Buscando destino... (${provincia || "Provincia no detectada"})`;
+
+    const destinoData = await lookupDestinoES(cp);
+
+    if (destinoData?.localidad) {
+      rDestino.textContent = `${destinoData.localidad} (${destinoData.provincia})`;
+    } else {
+      rDestino.textContent = `Localidad no disponible (${provincia || "Provincia no detectada"})`;
+    }
+  }
+
+  async function calcular(){
+    const cp = sanitizeCP(document.getElementById("cp").value);
+    const servicio = document.getElementById("servicio").value;
+    const largo = Number(document.getElementById("largo").value || 0);
+    const ancho = Number(document.getElementById("ancho").value || 0);
+    const alto = Number(document.getElementById("alto").value || 0);
+    const pesoReal = Number(document.getElementById("peso").value || 0);
+    const conIVA = document.getElementById("iva").value === "si";
+
+    const rDestino = document.getElementById("rDestino");
+    const rZona = document.getElementById("rZona");
+    const rServicio = document.getElementById("rServicio");
+    const rArea = document.getElementById("rArea");
+    const rVol = document.getElementById("rVol");
+    const rFact = document.getElementById("rFact");
+    const rPrecio = document.getElementById("rPrecio");
+    const rDetalle = document.getElementById("rDetalle");
+    const rAviso = document.getElementById("rAviso");
+
+    try{
+      if(cp.length !== 5) throw new Error("Escribe un código postal válido de 5 cifras.");
+      if(!largo || !ancho || !alto || !pesoReal) throw new Error("Rellena medidas y peso.");
+
+      const areaKey = getAreaByCP(cp);
+      const provinciaLocal = getProvinciaByCP(cp);
+
+      const destinoData = await lookupDestinoES(cp);
+
+      let localidadTxt = "Localidad no disponible";
+      let provinciaTxt = provinciaLocal || "Provincia no detectada";
+
+      if (destinoData) {
+        if (destinoData.localidad) localidadTxt = destinoData.localidad;
+        if (destinoData.provincia) provinciaTxt = destinoData.provincia;
+      }
+
+      const destinoTexto = `${localidadTxt} (${provinciaTxt})`;
+
+      const pesoVol = getPesoVolumetrico(largo, ancho, alto);
+      const pesoFact = round2(Math.max(pesoReal, pesoVol));
+
+      const baseCalc = calcularBaseServicio(servicio, areaKey, pesoFact);
+      const extrasCalc = calcularExtras(areaKey);
+
+      let subtotal = round2(baseCalc.base + extrasCalc.extras);
+      let total = subtotal;
+
+      if(conIVA){
+        total = round2(subtotal * 1.21);
+      }
+
+      rDestino.textContent = destinoTexto;
+      rZona.textContent =
+        areaKey === "PROVINCIAL" ? "Provincial" :
+        areaKey === "REGIONAL" ? "Regional" :
+        areaKey === "NACIONAL" ? "Nacional" :
+        areaKey === "BALEARES" ? "Baleares" :
+        areaKey.replaceAll("_"," ");
+      rServicio.textContent = SERVICE_LABELS[servicio];
+      rArea.textContent = areaKey.replaceAll("_"," ");
+      rVol.textContent = `${pesoVol.toFixed(2)} kg`;
+      rFact.textContent = `${pesoFact.toFixed(2)} kg`;
+      rPrecio.textContent = euro(total);
+
+      const detalle = [
+        `Salida: ${ORIGEN.localidad} (${ORIGEN.provincia}) · CP ${ORIGEN.cp}`,
+        `Llegada: ${destinoTexto} · CP ${cp}`,
+        `Base: ${euro(baseCalc.base)}`,
+        ...extrasCalc.detalle
+      ];
+
+      if(conIVA){
+        detalle.push(`Subtotal sin IVA: ${euro(subtotal)}`);
+        detalle.push("IVA 21% incluido");
+      } else {
+        detalle.push("Sin IVA");
+      }
+
+      rDetalle.innerHTML = detalle.join("<br>");
+      rAviso.textContent = baseCalc.nota;
+      rAviso.className = "notice ok";
+
+    } catch(err){
+      rPrecio.textContent = "—";
+      rDetalle.textContent = "";
+      rZona.textContent = "—";
+      rServicio.textContent = SERVICE_LABELS[servicio];
+      rArea.textContent = "—";
+      rVol.textContent = "—";
+      rFact.textContent = "—";
+      rAviso.textContent = err.message || "No se pudo calcular.";
+      rAviso.className = "notice danger";
+    }
+  }
+
+  function limpiar(){
+    document.getElementById("cp").value = "";
+    document.getElementById("largo").value = "";
+    document.getElementById("ancho").value = "";
+    document.getElementById("alto").value = "";
+    document.getElementById("peso").value = "";
+    document.getElementById("reembolso").value = "";
+    document.getElementById("iva").value = "no";
+    document.getElementById("servicio").value = "BUSINESS_24_48";
+    document.getElementById("optRecogida").checked = false;
+    document.getElementById("optSabado").checked = false;
+    document.getElementById("optInterciudad").checked = false;
+    document.getElementById("optAcuseExtra").checked = false;
+
+    document.getElementById("rDestino").textContent = "—";
+    document.getElementById("rZona").textContent = "—";
+    document.getElementById("rServicio").textContent = "—";
+    document.getElementById("rArea").textContent = "—";
+    document.getElementById("rVol").textContent = "—";
+    document.getElementById("rFact").textContent = "—";
+    document.getElementById("rPrecio").textContent = "—";
+    document.getElementById("rDetalle").textContent = "";
+    document.getElementById("rAviso").textContent = "Introduce un código postal, medidas, peso y servicio.";
+    document.getElementById("rAviso").className = "notice";
+  }
+
+  document.getElementById("btnCalcular").addEventListener("click", calcular);
+  document.getElementById("btnLimpiar").addEventListener("click", limpiar);
+
+  document.getElementById("cp").addEventListener("input", (e)=>{
+    e.target.value = sanitizeCP(e.target.value);
+  });
+
+  document.getElementById("cp").addEventListener("blur", async ()=>{
+    await pintarDestinoPreview();
+  });
+</script>
